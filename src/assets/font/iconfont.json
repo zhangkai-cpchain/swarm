@@ -1,0 +1,37 @@
+{
+  "id": "713859",
+  "name": "总代核算",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "141595",
+      "name": "data",
+      "font_class": "data",
+      "unicode": "e6f8",
+      "unicode_decimal": 59128
+    },
+    {
+      "icon_id": "525989",
+      "name": "交易记录",
+      "font_class": "jiaoyijilu",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "1761534",
+      "name": "设备",
+      "font_class": "shebei",
+      "unicode": "e650",
+      "unicode_decimal": 58960
+    },
+    {
+      "icon_id": "3287606",
+      "name": "合约执行",
+      "font_class": "icon-",
+      "unicode": "e6e3",
+      "unicode_decimal": 59107
+    }
+  ]
+}
