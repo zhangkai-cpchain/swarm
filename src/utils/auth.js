@@ -16,6 +16,13 @@ export function removeToken (id = TokenKey) {
 export function setUserId (id) {
   localStorage.setItem('id', id)
 }
+export function setRoleId (id) {
+  localStorage.setItem('role', id)
+}
+
+export function getRole () {
+  return localStorage.getItem('role')
+}
 
 export function getUserId () {
   return localStorage.getItem('id')

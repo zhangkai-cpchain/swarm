@@ -30,7 +30,7 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-
+import store from '@/store/index'
 export default {
   components: {
     Breadcrumb,
@@ -44,7 +44,12 @@ export default {
       this.$store.dispatch('app/toggleSideBar')
     },
     logout() {
-      this.$router.push({ path: '/' })
+      store.dispatch('user/setRole', '')
+      store.dispatch('user/setID', '')
+      setTimeout(() => {
+        this.$router.push({ path: '/' })
+      }, 1000)
+
       // this.$store.dispatch('user/logout').then(() => {
       //   // setTimeout(() => {
       //   //   this.$router.push({ path: '/login' })

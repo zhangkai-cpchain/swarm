@@ -1,13 +1,13 @@
 <template>
   <el-form :label-position="'left'" label-width="100px">
     <el-form-item label="用户ID">
-      <span>1</span>
+      <span>{{ user.userId }}</span>
     </el-form-item>
     <el-form-item label="所属部门">
-      <span>机密</span>
+      <span>{{ user.department }}</span>
     </el-form-item>
     <el-form-item label="权限等级">
-      <span>一级</span>
+      <span>{{ user.role | roleName }}</span>
     </el-form-item>
   </el-form>
 </template>
@@ -15,14 +15,16 @@
 <script>
 // import { getPermissions } from '@/api/role'
 // import store from '@/store'
+
 export default {
   props: {
     user: {
       type: Object,
       default: () => {
         return {
-          name: '',
-          email: ''
+          userId: '1',
+          department: 'shanghai',
+          role: '1'
         }
       }
     }

@@ -1,98 +1,60 @@
 // import request from '@/utils/request'
 import instance from '@/utils/request-fetch'
-export function signIn (data) {
+export function signIn(data) {
   return instance.post({
-    url: 'api/data/signin',
+    url: 'data/signin',
     data
   })
 }
 
-export function getNonceAndKeystore (data) {
-  return instance.post({
-    url: 'api/data/getNonceAndKeystore',
-    data
-  })
+export function getNonceAndKeystore(data) {
+  return Promise.all([
+    instance.post({
+      url: 'data/getNonce',
+      data
+    }),
+    instance.post({
+      url: 'data/getKeyStore',
+      data
+    })
+  ])
 }
-export function getNonce (data) {
+export function getNonce(data) {
   return instance.post({
-    url: 'api/data/getNonce',
+    url: 'data/getNonce',
     data
   })
 }
 
-export function register (data) {
-  return instance.post({
-    url: 'api/data/signup',
-    data
+export function register(formdata) {
+  return instance.postForm({
+    url: 'data/signup',
+    formdata
   })
 }
-export function getConfig () {
+export function getConfig() {
   return instance.get({
-    url: 'api/configs'
+    url: 'configs'
   })
 }
-export function login (data) {
+export function login(data) {
   return instance.post({
-    url: 'api/login',
+    url: 'login',
     method: 'post',
     data
   })
 }
 
-export function getInfo (id) {
-  return instance.get({
-    url: 'users/' + id
-  })
-}
-
-export function logout () {
+export function personalInfo(data) {
   return instance.post({
-    url: 'api/logout',
-    method: 'post'
+    url: 'data/personalInfo',
+    data
   })
 }
 
-export function getUsers () {
-  return instance.get({
-    url: 'users/?limit=999&page=0',
-    method: 'get'
-  })
-}
-export function addUser (data) {
+export function warningDetail(data) {
   return instance.post({
-    url: 'users/add',
-    method: 'post',
+    url: 'data/warningDetail',
     data
-  })
-}
-
-export function resetPassword (id, data) {
-  return instance.patch({
-    url: `/users/password/reset/${id}`,
-    method: 'patch',
-    data
-  })
-}
-
-export function changePassword (data) {
-  return instance.patch({
-    url: `/users/password/update`,
-    method: 'patch',
-    data
-  })
-}
-
-export function updateUserRole (id, data) {
-  return instance.patch({
-    url: `/users/role/update/${id}`,
-    method: 'patch',
-    data
-  })
-}
-
-export function deleteUser (id) {
-  return instance.delete({
-    url: `users/delete/${id}`,
-    method: 'delete'
   })
 }

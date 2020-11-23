@@ -1,13 +1,13 @@
-import { login, getInfo } from '@/api/user'
-import { setToken, removeToken, setUserId, getUserId } from '@/utils/auth'
-import router, { resetRouter } from '@/router'
+import { login } from '@/api/user'
+import { removeToken, setUserId, setRoleId } from '@/utils/auth'
+// import router, { resetRouter } from '@/router'
 
 const state = {
   id: '',
   name: '',
   avatar: '',
   introduction: '',
-  roles: [],
+  roles: '',
   permissions: []
 }
 
@@ -33,6 +33,14 @@ const mutations = {
 }
 
 const actions = {
+  setRole({ commit }, role) {
+    commit('SET_ROLES', role)
+    setRoleId(role)
+  },
+  setID({ commit }, id) {
+    commit('SET_ID', id)
+    setUserId(id)
+  },
   // user login
   login ({ commit }, userInfo) {
     const { username, password } = userInfo
@@ -51,19 +59,7 @@ const actions = {
   // get user info
   getInfo ({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.id || getUserId()).then(data => {
-        const { roles, username } = data
-        commit('SET_ROLES', roles)
-        commit('SET_NAME', username)
-        let permission = []
-        roles.forEach(element => {
-          permission = permission.concat(element.permissions)
-        })
-        commit('SET_PERMISSIONS', permission)
-        resolve(data)
-      }).catch(error => {
-        reject(error)
-      })
+
     })
   },
 
@@ -95,27 +91,10 @@ const actions = {
       removeToken()
       resolve()
     })
-  },
+  }
 
   // dynamically modify permissions
-  async changeRoles ({ commit, dispatch }, role) {
-    const token = role + '-token'
 
-    commit('SET_TOKEN', token)
-    setToken(token)
-
-    const { roles } = await dispatch('getInfo')
-
-    resetRouter()
-
-    // generate accessible routes map based on roles
-    const accessRoutes = await dispatch('permission/generateRoutes', roles, { root: true })
-    // dynamically add accessible routes
-    router.addRoutes(accessRoutes)
-
-    // reset visited views and cached views
-    dispatch('tagsView/delAllViews', null, { root: true })
-  }
 }
 
 export default {

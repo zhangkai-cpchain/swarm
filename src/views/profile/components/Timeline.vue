@@ -1,10 +1,12 @@
 <template>
   <div class="block">
     <el-timeline>
-      <el-timeline-item v-for="(item,index) of timeline" :key="index" :timestamp="item.timestamp" placement="top">
+      <el-timeline-item v-for="(item,index) of historyRev" :key="index" :timestamp="item.timestamp" placement="top">
         <el-card>
-          <h4>{{ item.title }}</h4>
-          <p>{{ item.content }}</p>
+          <h4>{{ item.operation | operationName }}</h4>
+          <p v-if="item.machineIds" class="log">操作对象: <em>{{ item.machineIds.join(',') }}</em></p>
+          <p class="log">操作时间: <em>{{ item.time | parseTime }}</em>
+          </p>
         </el-card>
       </el-timeline-item>
     </el-timeline>
@@ -13,31 +15,40 @@
 
 <script>
 export default {
+  props: {
+    history: {
+      type: Array,
+      default: () => {
+        return [
+          { operation: 'sensor', machineIds: ['ss'], time: 2345234534 },
+          { operation: 'detect', machineIds: ['ss', 'aa'], time: 2345234534 },
+          { operation: 'data', machineIds: ['ss'], time: 2345234534 }
+        ]
+      }
+    }
+  },
   data() {
-    return {
-      timeline: [
-        {
-          timestamp: '2019/4/20',
-          title: 'Update Github template',
-          content: 'PanJiaChen committed 2019/4/20 20:46'
-        },
-        {
-          timestamp: '2019/4/21',
-          title: 'Update Github template',
-          content: 'PanJiaChen committed 2019/4/21 20:46'
-        },
-        {
-          timestamp: '2019/4/22',
-          title: 'Build Template',
-          content: 'PanJiaChen committed 2019/4/22 20:46'
-        },
-        {
-          timestamp: '2019/4/23',
-          title: 'Release New Version',
-          content: 'PanJiaChen committed 2019/4/23 20:46'
-        }
-      ]
+    return {}
+  },
+  computed: {
+    historyRev() {
+      // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+      const res = this.history.sort((x, y) => -1)
+      return res
     }
   }
 }
 </script>
+
+ <style lang="scss" scoped>
+.log {
+  font-weight: 400;
+  font-size: 14px;
+
+  em {
+    margin-left: 10px;
+    color: #999999;
+    font-size: 14px;
+  }
+}
+</style>

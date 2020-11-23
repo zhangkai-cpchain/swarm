@@ -1,72 +1,83 @@
 <template>
-
-  <el-card shadow="hover" :class="'box-card '+item.status+'-border'">
-    <div slot="header" :class="item.status+' header'">
-      <span>{{ item.name }}</span>
+  <el-card shadow="hover" :class="'box-card '+statusCode+'-border'">
+    <div slot="header" :class="statusCode+' header'">
+      <span>{{ item.type | devName }}</span>
       <div class="btns">
-        <el-checkbox style="margin-right:10px" :disabled="item.status!='free'" />
-        <a href="#/swarm/device">
-          <el-button type="text">详情</el-button>
-        </a>
-      </div>
+        <el-checkbox v-if="!uncheckable" v-model="checked" style="margin-right:10px" />
 
+        <router-link :to="{name:'device',query:{machineId:item.machineId, }}">
+          <el-button type="text">详情</el-button>
+        </router-link>
+      </div>
     </div>
-    <el-form :label-position="'left'" label-width="80px" class="body">
+    <el-form :label-position="'left'" label-width="60px" class="body">
       <el-form-item label="类型:">
         <span>{{ item.type }}</span>
       </el-form-item>
       <el-form-item label="编号:">
-        <span>{{ item.No }}</span>
+        <span>{{ item.machineId }}</span>
       </el-form-item>
       <el-form-item label="状态:">
-        <span>{{ item.status }}</span>
+        <span>{{ item.machineStatus | machineStatus }}</span>
       </el-form-item>
       <el-form-item label="位置:">
-        <span>{{ item.location }}</span>
+        <span>{{ item.qps }}</span>
       </el-form-item>
       <el-form-item label="规格:">
-        <span>{{ item.spec }}</span>
+        <span>{{ item.size }}</span>
       </el-form-item>
       <el-form-item label="注册:">
-        <span>{{ item.regTime }}</span>
+        <span>{{ item.registerTime | parseTime }}</span>
       </el-form-item>
     </el-form>
-
   </el-card>
-
 </template>
 
 <script>
 export default {
   name: 'Card',
   props: {
+    uncheckable: {
+      type: Boolean,
+      default: false
+    },
     item: {
       type: Object,
       default: () => {
         return {
-          id: '1',
           name: '无人机1',
-          status: 'fault',
+          status: '0',
           type: 'UAV',
-          No: '1824',
-          location: '127.1',
-          spec: '8086',
-          regTime: '2020/10/29'
+          machineId: '1824',
+          qps: '127.1',
+          size: '8086',
+          registerTime: '2020/10/29'
         }
       }
     }
   },
-  computed: {
-    headerClass() {
-      const className = ''
-      switch (this.item.status) {
-        case 'free': break
-        case 'task': break
-        case 'fault': break
-      }
-      return className
+  data() {
+    return {
+      checked: false
+      // statusCode: ""
     }
-  }
+  },
+  computed: {
+    statusCode() {
+      const arr = ['free', 'task', 'fault']
+      if (this.item.warning) {
+        return 'fault'
+      } else {
+        return arr[this.item.machineStatus] || 'free'
+      }
+    }
+  },
+  watch: {
+    checked(val) {
+      this.$emit('change', this.item, val)
+    }
+  },
+  created() { }
 }
 </script>
 <style  lang="scss"  >

@@ -1,17 +1,21 @@
 <template>
   <div>
     <div class="logo2-container">
-      <img src="@/assets/logo2.png" alt="" class="logo2">
+      <img src="@/assets/logo2.png" alt class="logo2">
     </div>
     <div v-if="!loginType">
       <el-divider content-position="center">请选择登录方式</el-divider>
       <div class="choose" @click="loginType='local'">
         <div class="login">
-          <div class="img" alt=""><span /></div>
+          <div class="img" alt>
+            <span />
+          </div>
           <span>本地登录</span>
         </div>
         <div class="login" @click="loginType='cloud'">
-          <div class="img" alt=""><span /></div>
+          <div class="img" alt>
+            <span />
+          </div>
           <span>云端登录</span>
         </div>
       </div>
@@ -24,7 +28,6 @@
             <el-input v-model="userId" autocomplete="off" />
             <el-button style="margin:10px 0" :loading="loading" type="primary" @click="getNonce">获取Nonce</el-button>
           </div>
-
         </el-form-item>
         <el-form-item label="Nonce" :label-width="formLabelWidth">
           <el-input v-model="nonce" disabled autocomplete="off" />
@@ -49,7 +52,6 @@
             <el-input v-model="userId" autocomplete="off" />
             <el-button style="margin:10px 0" :loading="loading" type="primary" @click="getNonceAndKeystore">获取Nonce</el-button>
           </div>
-
         </el-form-item>
         <el-form-item label="Nonce" :label-width="formLabelWidth">
           <el-input v-model="nonce" disabled autocomplete="off" />
@@ -73,6 +75,7 @@
 import { ethers } from 'ethers'
 import { Message } from 'element-ui'
 import { getNonce, getNonceAndKeystore, signIn } from '@/api/user'
+import store from '@/store'
 export default {
   props: {
     dialogFormVisible: {
@@ -129,9 +132,9 @@ export default {
     },
     getNonceAndKeystore() {
       this.loading = true
-      getNonceAndKeystore({ userId: this.userId }).then(({ data }) => {
-        this.nonce = data.nonce
-        this.keystore = data.keystore
+      getNonceAndKeystore({ userId: this.userId }).then(([nonce, keystore]) => {
+        this.nonce = nonce.data
+        this.keystore = keystore.data.keystore
         this.loading = false
       })
     },
@@ -144,12 +147,36 @@ export default {
     },
     async localLogin() {
       this.loading = true
-      const wallet = await ethers.Wallet.fromEncryptedJson(this.keystore, this.password)
-      this.token = await wallet.signMessage(this.nonce)
-      console.log(this.token, wallet)
-      const res = await signIn({ Id: this.userId, Token: this.token })
-      console.log(res)
-      this.loading = false
+      try {
+        const wallet = await ethers.Wallet.fromEncryptedJson(
+          this.keystore,
+          this.password
+        )
+        this.token = await wallet.signMessage(this.nonce)
+        const res = await signIn({
+          userId: this.userId,
+          signature: this.token
+        })
+        if (!res.errorMsg) {
+          store.dispatch('user/setID', this.userId)
+          this.$router.push('/profile')
+        } else {
+          Message({
+            message: res.errorMsg,
+            type: 'error',
+            duration: 5 * 1000
+          })
+        }
+
+        this.loading = false
+      } catch (error) {
+        Message({
+          message: error,
+          type: 'error',
+          duration: 5 * 1000
+        })
+        this.loading = false
+      }
     },
     close() {
       this.$emit('close')
@@ -176,9 +203,13 @@ export default {
     },
     sequenceDownload() {
       const json = JSON.parse(this.form.keystore)
-      delete (json['x-ethers'])
+      delete json['x-ethers']
       const element = document.createElement('a')
-      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(json)))
+      element.setAttribute(
+        'href',
+        'data:text/plain;charset=utf-8,' +
+        encodeURIComponent(JSON.stringify(json))
+      )
       element.setAttribute('download', json.address + '.keystore')
       element.style.display = 'none'
       element.click()

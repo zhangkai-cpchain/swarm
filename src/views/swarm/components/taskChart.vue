@@ -10,6 +10,12 @@ import resize from './mixins/resize'
 export default {
   mixins: [resize],
   props: {
+    info: {
+      type: Object,
+      default: () => {
+        return { correct: 66, wrong: 2, noResponse: 4 }
+      }
+    },
     className: {
       type: String,
       default: 'chart'
@@ -28,6 +34,11 @@ export default {
       chart: null
     }
   },
+  watch: {
+    info() {
+      this.initChart()
+    }
+  },
   mounted() {
     this.$nextTick(() => {
       this.initChart()
@@ -43,7 +54,6 @@ export default {
   methods: {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
-
       this.chart.setOption({
         tooltip: {
           trigger: 'item',
@@ -62,9 +72,9 @@ export default {
             radius: [15, 95],
             center: ['50%', '38%'],
             data: [
-              { value: 133, name: '正确结果' },
-              { value: 17, name: '无响应' },
-              { value: 16, name: '错误结果' }
+              { value: this.info.success, name: '正确结果' },
+              { value: this.info.pending, name: '无响应' },
+              { value: this.info.fail, name: '错误结果' }
             ],
             animationEasing: 'cubicInOut',
             animationDuration: 2600

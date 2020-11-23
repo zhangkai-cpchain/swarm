@@ -1,144 +1,167 @@
 <template>
   <div class="r-main">
-    <div class="row">
-      <div>
-        <p>合约数据</p>
-      </div>
+    <div class="row header">
+      <p>合约数据</p>
     </div>
 
-    <div class="row">
-      <span>时间</span>
-      <span>余额</span>
-      <span>冻结金额</span>
-      <span>总电量</span>
+    <div class="row sub">
+      <span class="cl0">时间</span>
+      <span class="cl1">设备ID</span>
+      <span class="cl2">数据类型</span>
+      <span class="cl3">文件大小</span>
     </div>
-    <div
-      v-for="(item,i) in list"
-      :key="i"
-      class=" row"
-    >
-      <span>{{ item.timestamp | parseTime("{h}:{i}:{s}") }}</span>
-      <span>{{ item.balance }}</span>
-      <span>{{ item.freeze }}</span>
-      <span>{{ item.totalPower }}</span>
+    <div class="items">
+      <div v-for="(item,i) in list" :key="i" :class="fade ? 'row animate__animated animate__slideInDown' : 'row'">
+        <span class="cl0">{{ item.time | parseTime("{h}:{i}:{s}") }}</span>
+        <span class="cl1">{{ item.machineId }}</span>
+        <span class="cl2">{{ item.dataType }}</span>
+        <a class="cl3">{{ item.size }} kb</a>
+      </div>
     </div>
+    <Pop v-if="dataVisible" :item="contractData" @close="dataVisible=false " />
   </div>
 </template>
 
 <script>
 import pump from '../data/pump'
 import { showContractDataCount } from '../../../utils/variables'
-import { getContractDataFields } from '@/api/contract'
-const TLV = require('node-tlv')
+import Pop from './pop'
 export default {
   name: 'Center',
+  components: { Pop },
   data() {
     return {
+      dataVisible: false,
       list: [],
-      tlvArr: []
+      tlvArr: [],
+      contractData: {},
+      fade: true
     }
   },
   async created() {
-    await this.getFields()
-
-    this.qingshuichi_output_water_ph = pump.contract_data.subscribe(element => {
-      if (!element) return
-
-      const tlv = TLV.parse(element.tlv)
-      this.tlvArr.forEach(t => {
-        const tagHex = t.tag < 16 ? '0' + t.tag.toString(16) : t.tag.toString(16)
-
-        const tlv_sub = tlv.find(tagHex)
-        if (!tlv_sub) return
-        try {
-          switch (t.type) {
-            case 'NUMBER':
-              element[t.name] = Buffer.from(tlv_sub.value, 'hex').readFloatBE(0).toFixed(t.precision || 2)
-              break
-            case 'TIMESTAMP':
-              element[t.name] = Buffer.from(tlv_sub.value, 'hex').readIntBE(0)
-              break
-            default:
-              element[t.name] = Buffer.from(tlv_sub.value, 'hex').toString()
-          }
-        } catch (error) {
-          console.log(error)
-        }
-      })
-
+    pump.contract_data.subscribe(element => {
+      if (!element || !element.time) return
+      if (this.list.length > 0 && element.time <= this.list[0].time) return
       this.list.unshift(element)
-
-      if (this.list.length > showContractDataCount) { this.list.pop() }
+      this.fade = true
+      if (this.list.length > showContractDataCount) {
+        this.list.pop()
+      }
       setTimeout(() => {
         this.fade = false
       }, 1000)
     })
   },
   methods: {
-    async getFields() {
-      const response = await getContractDataFields()
-      response.forEach(element => {
-        if (element.tag !== -1) {
-          this.tlvArr.push(element)
-        }
-      })
+    handleClose(done) {
+      this.$confirm('确认关闭？')
+        .then(_ => {
+          done()
+        })
+        .catch(_ => { })
+    },
+    showData(item) {
+      this.contractData = item
+      this.dataVisible = true
+    },
+    handleDownload(item) {
+      var x = new XMLHttpRequest()
+      x.open(
+        'GET',
+        '/api/fabricDemo/' + item.fileName,
+        // "https://cube.elemecdn.com/6/94/4d3ea53c084bad6931a56d5158a48jpeg.jpeg",
+        true
+      )
+      x.responseType = 'blob'
+      x.onload = function (e) {
+        var url = window.URL.createObjectURL(x.response)
+        var a = document.createElement('a')
+        a.href = url
+        a.download = ''
+        a.click()
+      }
+      x.send()
     }
   }
 }
 </script>
 <style lang="scss" scoped>
-.r-main {
-  height: 100%;
-  width: 100%;
-  border-left: 0.01vh solid #00507a;
+.tlv {
+  text-decoration: underline;
+  text-rendering: optimizeLegibility;
+  text-overflow: ellipsis;
+  color: #ff9900 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  width: 150px !important;
   overflow: hidden;
-
-  // background-color: blue;
+}
+.r-main {
+  height: 98%;
+  overflow: hidden;
+  margin: 10px 0;
+  border-radius: 4px;
+  border: 2px solid rgba(5, 62, 108, 1);
 }
 .row {
+  height: 48px;
   flex-direction: row;
   align-items: center;
-  padding: 10px 16px;
-  margin: 3px;
+  // justify-content: space-between;
+  padding: 0 14px;
   display: flex;
-  box-shadow: rgba(10, 114, 212, 0.2) 0 0 3px;
-  background: rgba(10, 54, 112, 0.2);
-  p {
-    font-size: 16px;
-    color: rgba($color: #ffffff, $alpha: 1);
-    width: 100%;
-    text-align: center;
-  }
-  span {
-    width: 25%;
-    font-size: 14px;
-    color: rgba($color: #dddddd, $alpha: 1);
-    text-align: center;
-  }
+  background-color: rgba(11, 27, 72, 1);
+  border-bottom: 2px solid rgba(5, 62, 108, 1);
+  color: rgba($color: #ffffff, $alpha: 1);
 
-  & :first-child {
-    text-align: left;
+  span {
+    // width: 50%;
+    font-size: 14px;
+    color: rgba($color: #ffffff, $alpha: 1);
+    // text-align: center;
   }
-  & :last-child {
-    text-align: right;
-  }
-  // .s1 {
-  //   width: 33%;
-  //   font-size: 14px;
-  //   color: rgba($color: #ffffff, $alpha: 0.8);
-  //   text-align: left;
-  // }
-  // .s2 {
-  //   width: 33%;
-  //   font-size: 14px;
-  //   color: rgba($color: #ffffff, $alpha: 0.8);
-  //   text-align: right;
-  // }
-  // .s3 {
-  //   width: 33%;
-  //   font-size: 14px;
-  //   color: rgba($color: #ffffff, $alpha: 0.8);
-  //   text-align: right;
-  // }
+}
+
+.header {
+  height: 60px !important;
+  font-size: 18px;
+  font-weight: 700;
+}
+.sub {
+  font-size: 16px;
+}
+
+.items {
+  scrollbar-width: none; /* firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+  overflow-x: hidden;
+  overflow-y: auto;
+  // background: rgba(8, 36, 83, 1);
+  background-color: rgba(11, 27, 72, 1);
+  height: calc(94vh - 140px);
+  // height: 200px;
+  overflow: scroll;
+}
+
+.cl0 {
+  width: 80px;
+}
+.cl1 {
+  width: 150px;
+  text-align: left;
+}
+.cl2 {
+  width: 90px;
+}
+.cl3 {
+  width: 90px;
+  text-align: center;
+}
+
+.el-tag--medium {
+  width: 88px !important;
+  height: 30px !important;
+  text-align: center;
+  font-size: 13px !important;
 }
 </style>

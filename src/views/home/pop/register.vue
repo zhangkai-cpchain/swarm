@@ -2,7 +2,7 @@
   <div>
     <el-form :model="form">
       <div class="logo2-container">
-        <img src="@/assets/logo2.png" alt="" class="logo2">
+        <img src="@/assets/logo2.png" alt class="logo2">
       </div>
 
       <el-divider content-position="center">请填写必要信息</el-divider>
@@ -12,10 +12,9 @@
           <el-button v-if="form.keystore" style="margin:10px 0" :loading="generating" type="primary" @click="sequenceDownload">{{ '下载密钥' }}</el-button>
           <el-button v-else style="margin:10px 0" :loading="generating" type="primary" @click="generateKeyPairHex">{{ '生成并下载密钥' }}</el-button>
         </div>
-
       </el-form-item>
       <el-form-item label="证明文件" :label-width="formLabelWidth">
-        <input type="file" style="" @change="uploadImg($event, 1)">
+        <input id="identification" type="file" style>
       </el-form-item>
       <el-form-item label="权限等级" :label-width="formLabelWidth">
         <el-select v-model="form.role" placeholder="权限等级">
@@ -24,20 +23,23 @@
           <el-option label="三级" value="3" />
         </el-select>
       </el-form-item>
-      <el-form-item label="姓名" :label-width="formLabelWidth">
-        <el-input v-model="form.userName" autocomplete="off" />
+      <el-form-item label="部门" :label-width="formLabelWidth">
+        <el-input v-model="form.remark" autocomplete="off" />
       </el-form-item>
     </el-form>
     <div slot="footer" class="dialog-footer submit">
-      <el-button type="primary" :disabled="!(form.keystore&&form.role&&form.userName)" @click="registerAndLogin">提交注册</el-button>
+
+      <el-button type="primary" :disabled="!(form.keystore&&form.role&&form.remark)" @click="registerAndLogin">提交注册</el-button>
     </div>
+
   </div>
 </template>
 
 <script>
 import { ethers } from 'ethers'
 import { Message } from 'element-ui'
-// import { register } from '@/api/user'
+import { register } from '@/api/user'
+import store from '@/store/index'
 export default {
   props: {
     dialogFormVisible: {
@@ -47,12 +49,14 @@ export default {
   },
   data() {
     return {
+      id: '',
+      publicKey: '',
       passwd: '',
       form: {
         keystore: '',
         role: '',
-        publicKey: '',
-        userName: ''
+        identification: '',
+        remark: ''
       },
       formLabelWidth: '100px',
       generating: false
@@ -60,17 +64,43 @@ export default {
   },
   methods: {
     registerAndLogin() {
-      // register(this.form).then(res => {
-      //   console.log(res)
-      // })
-      setTimeout(() => {
+      if (!document.getElementById('identification').files[0]) {
         Message({
-          message: '注册成功',
-          type: 'success',
+          message: '请选择证明文件',
+          type: 'error',
           duration: 3 * 1000
         })
-        this.$router.push('/profile')
-      }, 2000)
+        return
+      }
+      // console.log(document.getElementById('identification').files[0])
+
+      const formdata = new window.FormData()
+      formdata.append('keystore', this.form.keystore)
+      formdata.append('role', this.form.role)
+      formdata.append('remark', this.form.remark)
+      formdata.append(
+        'identification',
+        document.getElementById('identification').files[0]
+      )
+
+      register(formdata).then(res => {
+        if (res.data) {
+          this.$emit('close')
+          this.id = res.data
+          store.dispatch('user/setID', res.data)
+          this.$confirm('注册成功，请保存好您的登录Id: ' + res.data)
+            .then(_ => {
+              this.$router.push('/profile')
+            })
+            .catch(_ => { })
+          // Message({
+          //   message: "注册成功",
+          //   type: "success",
+          //   duration: 3 * 1000
+          // });
+          // this.$router.push("/profile");
+        }
+      })
     },
     close() {
       this.$emit('close')
@@ -86,21 +116,27 @@ export default {
       }
       this.generating = true
       const wallet = ethers.Wallet.createRandom()
-      this.form.publicKey = wallet.publicKey
-      wallet.encrypt(this.passwd, { N: 2 ** 18 }).then(keystore => {
-        this.form.keystore = keystore
-        console.log(keystore)
-        this.sequenceDownload()
+      this.publicKey = wallet.publicKey
+      wallet.encrypt(this.passwd, { N: 2 ** 10 }).then(keystore => {
+        const json = JSON.parse(keystore)
+        json.publicKey = this.publicKey
+        delete json['x-ethers']
+        delete json['address']
+        this.form.keystore = JSON.stringify(json)
+        console.log(this.form.keystore)
+        this.sequenceDownload(json)
         this.generating = false
       })
       console.log(wallet)
     },
-    sequenceDownload() {
-      const json = JSON.parse(this.form.keystore)
-      delete (json['x-ethers'])
+    sequenceDownload(json) {
       const element = document.createElement('a')
-      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.stringify(json)))
-      element.setAttribute('download', json.address + '.keystore')
+      element.setAttribute(
+        'href',
+        'data:text/plain;charset=utf-8,' +
+        encodeURIComponent(JSON.stringify(json))
+      )
+      element.setAttribute('download', json.id + '.keystore')
       element.style.display = 'none'
       element.click()
     }

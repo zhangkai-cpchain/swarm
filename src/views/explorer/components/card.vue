@@ -1,41 +1,35 @@
 <template>
-  <div
-    v-if="type == 'block'"
-    :class="fade ? 'card animate__animated animate__slideInDown' : 'card'"
-  >
+  <div v-if="type == 'block'" :class="fade ? 'card animate__animated animate__slideInDown' : 'card'">
     <div class="row">
       <i class="iconfont icon-data" />
-      <span>{{ item.channel }}</span>
+      <span>{{ '' }}</span>
     </div>
     <div class="row">
-      <p>#{{ item.number }}</p>
+      <p>#{{ item.height }}</p>
       <span>
-        {{ item.txCount }}
+        {{ item.txs }}
         <em>Transactions</em>
       </span>
     </div>
     <div class="row">
       <em class="hash">{{ item.blockHash }}</em>
-      <span>{{ item.timestamp | timeAgo }} ago</span>
+      <span>{{ item.time | timeAgo }} ago</span>
     </div>
   </div>
-  <div
-    v-else
-    :class="fade ? 'card animate__animated animate__slideInDown' : 'card'"
-  >
+  <div v-else :class="fade ? 'card animate__animated animate__slideInDown' : 'card'">
     <div class="row">
       <i class="iconfont icon-jiaoyijilu" />
-      <span>{{ item.creatorMSP }}</span>
+      <span>{{ '' }}</span>
     </div>
     <div class="row">
-      <p>#{{ item.blockNumber }}</p>
+      <p>#{{ item.height }}</p>
       <span>
-        <em>{{ item.validationCode }}</em>
+        <em>{{ item.status }}</em>
       </span>
     </div>
     <div class="row">
-      <em class="hash">{{ item.hash }}</em>
-      <span>{{ item.timestamp | timeAgo }} ago</span>
+      <em class="hash">{{ item.txHash }}</em>
+      <span>{{ item.time | timeAgo }} ago</span>
     </div>
   </div>
 </template>
@@ -57,17 +51,17 @@ export default {
       required: true
     }
   },
-  data () {
+  data() {
     return {
       i: {}
     }
   },
-  mounted () {
+  mounted() {
     this.i = setInterval(() => {
       this.$forceUpdate()
     }, 1000)
   },
-  destroyed () {
+  destroyed() {
     clearInterval(this.i)
   },
   methods: {}
@@ -75,8 +69,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 .card {
-  padding: 8px 16px;
-  margin: 8px 20px;
+  padding: 10px 16px;
+  margin: 10px 6px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;

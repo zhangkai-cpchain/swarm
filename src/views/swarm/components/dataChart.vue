@@ -10,6 +10,19 @@ import resize from './mixins/resize'
 export default {
   mixins: [resize],
   props: {
+    info: {
+      type: Object,
+      default: () => {
+        return {
+          image: 66,
+          video: 66,
+          pressure: 66,
+          motion: 66,
+          color: 66,
+          temperature: 66
+        }
+      }
+    },
     className: {
       type: String,
       default: 'chart'
@@ -28,6 +41,11 @@ export default {
       chart: null
     }
   },
+  watch: {
+    info() {
+      this.initChart()
+    }
+  },
   mounted() {
     this.$nextTick(() => {
       this.initChart()
@@ -43,7 +61,6 @@ export default {
   methods: {
     initChart() {
       this.chart = echarts.init(this.$el, 'macarons')
-
       this.chart.setOption({
         tooltip: {
           trigger: 'item',
@@ -52,7 +69,7 @@ export default {
         legend: {
           left: 'center',
           bottom: '10',
-          data: ['GPS', '气压', '图像']
+          data: ['图像', '视频', '气压', '运动', '颜色', '温湿度']
         },
         series: [
           {
@@ -62,9 +79,12 @@ export default {
             radius: [15, 95],
             center: ['50%', '38%'],
             data: [
-              { value: 313, name: 'GPS' },
-              { value: 171, name: '气压' },
-              { value: 116, name: '图像' }
+              { value: this.info.image, name: '图像' },
+              { value: this.info.video, name: '视频' },
+              { value: this.info.pressure, name: '气压' },
+              { value: this.info.motion, name: '运动' },
+              { value: this.info.color, name: '颜色' },
+              { value: this.info.temperature, name: '温湿度' }
             ],
             animationEasing: 'cubicInOut',
             animationDuration: 2600

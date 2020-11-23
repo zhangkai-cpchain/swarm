@@ -119,8 +119,61 @@ export function regStatus (str) {
 export function NodeStatus (str) {
   const status = {
     RUNNING: 'running',
-    UNREACHABLE: 'unreachable'
+    UNREACHABLE: 'unreachable',
+    running: 'running',
+    'broken': 'offline'
 
   }
-  return status[str] || ''
+  return status[str] || str
+}
+
+export function machineStatus (str) {
+  const machineStatus = {
+    '0': '空闲',
+    '1': '任务中',
+    '2': '故障'
+  }
+  return machineStatus[str] || ''
+}
+
+const devType = {
+  uuv: '无人潜航器',
+  usv: '无人艇',
+  uav: '无人机',
+  UUV: '无人潜航器',
+  USV: '无人艇',
+  UAV: '无人机'
+}
+
+export function devName (str) {
+  return devType[str] || ''
+}
+
+roleName
+
+const roleNameType = {
+  '1': '一级',
+  '2': '二级',
+  '3': '三级'
+}
+
+export function roleName (str) {
+  return roleNameType[str] || ''
+}
+
+const operationType = {
+  queryData: '查询数据',
+  createTask: '发布任务',
+  data: '下载数据'
+}
+export function operationName (str) {
+  return operationType[str] || str
+}
+
+export function objectName (str) {
+  const operationType = {
+    operator: '人员',
+    machine: '集群'
+  }
+  return operationType[str] || str
 }

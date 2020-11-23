@@ -2,16 +2,30 @@
 // eslint-disable-next-line no-unused-vars
 import { Message } from 'element-ui'
 import qs from 'qs'
-import { setUserId } from './auth'
+const resolveHttpCode = (r) => {
+  switch (r.status) {
+    case 500:
+      return Promise.reject({ message: '服务器错误' })
+    case 404:
+      return Promise.reject({ message: '无效的请求地址' })
+    case 403:
+      return Promise.reject({ message: '权限不足' })
+    case 401:
+      return Promise.reject({ message: '权限不足' })
+    default:
+      return r.json()
+  }
+}
+
 class Instance {
-  static getInstance () {
+  static getInstance() {
     if (!this.instance) {
       this.instance = new Instance()
     }
     return this.instance
   }
 
-  put ({ url, data }) {
+  put({ url, data }) {
     return fetch(process.env.VUE_APP_BASE_API + url, {
       method: 'PUT',
       credentials: 'include',
@@ -22,9 +36,7 @@ class Instance {
       body: (data ? JSON.stringify(data) : null)
 
     })
-      .then(r => {
-        return r.json()
-      })
+      .then(resolveHttpCode)
       .then(r => {
         if (r.message) {
           return Promise.reject(r)
@@ -39,7 +51,7 @@ class Instance {
         })
       })
   }
-  patch ({ url, data }) {
+  patch({ url, data }) {
     return fetch(process.env.VUE_APP_BASE_API + url, {
       method: 'PATCH',
       credentials: 'include',
@@ -50,9 +62,7 @@ class Instance {
       body: (data ? JSON.stringify(data) : null)
 
     })
-      .then(r => {
-        return r.json()
-      })
+      .then(resolveHttpCode)
       .then(r => {
         if (r.message) {
           return Promise.reject(r)
@@ -67,7 +77,7 @@ class Instance {
         })
       })
   }
-  delete ({ url }) {
+  delete({ url }) {
     return fetch(process.env.VUE_APP_BASE_API + url, {
       method: 'DELETE',
       credentials: 'include',
@@ -76,13 +86,7 @@ class Instance {
         'Content-Type': 'application/json;charset=UTF-8'
       }
     })
-      .then(r => {
-        if (r.status === 200) {
-          return ''
-        } else {
-          return Promise.reject('操作失败')
-        }
-      })
+      .then(resolveHttpCode)
       .then(r => {
         console.log(r)
         if (r.message) {
@@ -98,8 +102,33 @@ class Instance {
         })
       })
   }
+  postForm({ url, formdata }) {
+    return fetch(process.env.VUE_APP_BASE_API + url, {
+      method: 'POST',
+      // credentials: 'include',
+      // mode: 'cors',
+      // headers: {
+      //   'Content-Type': 'application/json;charset=UTF-8'
+      // },
+      body: formdata
+    })
+      .then(resolveHttpCode)
+      .then(r => {
+        if (r.message) {
+          return Promise.reject(r)
+        } else {
+          return r
+        }
+      }).catch(err => {
+        Message({
+          message: err.message || err.message || 'Error',
+          type: 'error',
+          duration: 5 * 1000
+        })
+      })
+  }
 
-  post ({ url, data }) {
+  post({ url, data }) {
     return fetch(process.env.VUE_APP_BASE_API + url, {
       method: 'POST',
       credentials: 'include',
@@ -110,18 +139,8 @@ class Instance {
       body: (data ? JSON.stringify(data) : null)
 
     })
-      .then(r => {
-        console.log(r)
-
-        return Promise.all([r.json(), Promise.resolve(r.status)])
-        // if (r.status === 200) {
-        //   return Promise.resolve('success')
-        // } else {
-        //   return r.json()
-        // }
-      })
-      .then(([r, s]) => {
-        console.log(r, s)
+      .then(resolveHttpCode)
+      .then((r) => {
         if (r.message) {
           return Promise.reject(r)
         } else {
@@ -135,7 +154,7 @@ class Instance {
         })
       })
   }
-  get ({ url, query }) {
+  get({ url, query }) {
     return fetch(process.env.VUE_APP_BASE_API + url + (query ? ('?' + qs.stringify(query)) : ''), {
       method: 'GET',
       credentials: 'include',
@@ -145,9 +164,7 @@ class Instance {
       }
 
     })
-      .then(r => {
-        return r.json()
-      })
+      .then(resolveHttpCode)
       .then(r => {
         if (r.message) {
           return Promise.reject(r)
@@ -160,9 +177,6 @@ class Instance {
           type: 'error',
           duration: 5 * 1000
         })
-
-        console.log('clear id')
-        setUserId('')
       })
   }
 }

@@ -2,20 +2,39 @@
   <div>
     <header>
       <div class="logo-area">
-        <img src="@/assets/logo.png" alt="" srcset="" class="logo">
-        <h3> 中国船舶第七一六研究所</h3>
+        <img src="@/assets/logo.png" alt srcset class="logo">
+        <h3>中国船舶第七一六研究所</h3>
       </div>
-      <div class="login">
+      <div v-if="!userId" class="login">
         <el-button type="text" @click="registerDialogFormVisible = true">注册</el-button>
         <el-button type="text" @click="loginDialogFormVisible = true">登录</el-button>
       </div>
+      <a v-else class="user" href="#/profile/index">
+        <el-avatar icon="el-icon-user-solid" />
+        <a type="text">{{ userId }}</a>
+      </a>
     </header>
 
     <div>
       <el-carousel trigger="click" type="card" height="350px">
-        <el-carousel-item v-for="item in 10" :key="item" class="carousel">
-          <img src="@/assets/main.png" style="width:100%">
+        <el-carousel-item class="carousel">
+          <img src="@/assets/banner/b1.jpg" style="width:100%">
         </el-carousel-item>
+        <el-carousel-item class="carousel">
+          <img src="@/assets/banner/b2.jpg" style="width:100%">
+        </el-carousel-item>
+        <el-carousel-item class="carousel">
+          <img src="@/assets/banner/b3.png" style="width:100%">
+        </el-carousel-item>
+        <el-carousel-item class="carousel">
+          <img src="@/assets/banner/b4.png" style="width:100%">
+        </el-carousel-item>
+        <el-carousel-item class="carousel">
+          <img src="@/assets/banner/b5.jpg" style="width:100%">
+        </el-carousel-item>
+        <!-- <el-carousel-item  class="carousel">
+          <img src="@/assets/banner/b6.png" style="width:100%">
+        </el-carousel-item>-->
       </el-carousel>
     </div>
 
@@ -29,30 +48,33 @@
               </div>
               <p>无人集群管理</p>
               <div class="card-panel-description">
-                <div class="card-panel-text">向无人集群发布指令
-                  查询任务结果</div>
+                <div class="card-panel-text">
+                  向无人集群发布指令
+                  查询任务结果
+                </div>
               </div>
             </div>
           </a>
           <a href="#/swarm/query">
             <div class="card-panel">
-              <div class="card-panel-icon-wrapper  icon-message">
+              <div class="card-panel-icon-wrapper icon-message">
                 <i class="iconfont icon-data" class-name="card-panel-icon" style="font-size: 48px;" />
               </div>
               <p>数据查询服务</p>
               <div class="card-panel-description">
-                <div class="card-panel-text">查询无人集群传感器数据 </div>
+                <div class="card-panel-text">查询无人集群传感器数据</div>
               </div>
             </div>
           </a>
-          <a href="">
+          <a href="#/explorer">
             <div class="card-panel">
               <div class="card-panel-icon-wrapper icon-money">
                 <i class="iconfont icon-shebei" class-name="card-panel-icon" style="font-size: 48px;" />
               </div>
               <p>区块链状态监控</p>
               <div class="card-panel-description">
-                <div class="card-panel-text">实时监控链上状态
+                <div class="card-panel-text">
+                  实时监控链上状态
                   数据可视化
                 </div>
               </div>
@@ -63,16 +85,14 @@
     </el-row>
 
     <footer>
-
       <div class="contact">
-        <img src="@/assets/logo.png" alt="" srcset="" class="logo">
-        <h3> 中国船舶第七一六研究所上海分部</h3>
+        <img src="@/assets/logo.png" alt srcset class="logo">
+        <h3>中国船舶第七一六研究所上海分部</h3>
         <div class="other" />
       </div>
       <div class="copyright">
         <p>版权所有</p>
       </div>
-
     </footer>
     <el-dialog width="550px" :visible.sync="registerDialogFormVisible">
       <Register @close="registerDialogFormVisible=false" />
@@ -80,11 +100,11 @@
     <el-dialog width="550px" :visible.sync="loginDialogFormVisible">
       <Login @close="loginDialogFormVisible=false" />
     </el-dialog>
-
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import Register from './pop/register'
 import Login from './pop/login'
 export default {
@@ -105,6 +125,12 @@ export default {
       },
       formLabelWidth: '120px'
     }
+  },
+  computed: {
+    ...mapGetters(['id']),
+    userId() {
+      return this.id
+    }
   }
 }
 </script>
@@ -115,13 +141,16 @@ export default {
 .copyright {
   p {
     margin: 0 !important;
+    color: #cccccc;
+    font-size: 12px;
   }
 }
 .carousel {
   // width: 100%;
+  margin: auto;
   // display: flex;
   // justify-content: center;
-  background: #34bfa3;
+  // background: #34bfa3;
 }
 .logo {
   height: 40px;
@@ -130,11 +159,12 @@ export default {
 }
 footer {
   height: 100px;
-  background: #475669;
+  background: #0e2e5a;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  color: #ffffff;
   .contact {
     display: flex;
     justify-content: center;
@@ -148,10 +178,11 @@ footer {
 header {
   padding: 0 50px;
   height: 60px;
-  background: #475669;
+  background: #0e2e5a;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: #ffffff;
   .logo-area {
     height: 100%;
     display: flex;
@@ -159,6 +190,7 @@ header {
     align-items: center;
     img: {
       // height: 50px;
+      border-radius: 2px;
     }
     h3: {
       font-size: 30px;
@@ -289,6 +321,16 @@ header {
         font-size: 20px;
       }
     }
+  }
+}
+
+.user {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  a {
+    color: #ffffff;
+    margin-left: 10px;
   }
 }
 

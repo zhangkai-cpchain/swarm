@@ -2,11 +2,11 @@
   <el-card shadow="hover" :class="'box-card '">
     <section class="header">
       <el-avatar :size="'large'" :src="'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'" />
-      <el-tag size="mini" :type="'info'" style="margin-top:4px">user</el-tag>
+      <el-tag size="mini" :type="'info'" style="margin-top:4px">{{ item.userId }}</el-tag>
     </section>
     <el-form :label-position="'left'" label-width="80px" class="body">
       <el-form-item label="权限等级">
-        <span>{{ item.type }}</span>
+        <span>{{ item.role | roleName }}</span>
       </el-form-item>
       <el-form-item label="监控状态">
         <el-tag size="medium" effect="dark" :type="'success'" style="margin-top:4px">正常</el-tag>
@@ -25,14 +25,7 @@ export default {
       type: Object,
       default: () => {
         return {
-          id: '1',
-          name: '无人机1',
-          status: 'fault',
-          type: 'UAV',
-          No: '1824',
-          location: '127.1',
-          spec: '8086',
-          regTime: '2020/10/29'
+
         }
       }
     }

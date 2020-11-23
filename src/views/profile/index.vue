@@ -1,13 +1,13 @@
 <template>
   <div class="app-container">
-    <div v-if="user">
+    <div>
       <el-row :gutter="20">
         <el-col :span="18" :xs="24">
           <el-card>
             <div slot="header" class="clearfix">
               <span>基本信息</span>
             </div>
-            <account :user="user" />
+            <account :user="basicInfo" />
           </el-card>
         </el-col>
       </el-row>
@@ -17,7 +17,7 @@
             <div slot="header" class="clearfix">
               <span>历史日志</span>
             </div>
-            <timeline />
+            <timeline :history="history" />
           </el-card>
         </el-col>
       </el-row>
@@ -30,21 +30,20 @@ import { mapGetters } from 'vuex'
 // import Activity from './components/Activity'
 import Timeline from './components/Timeline'
 import Account from './components/Account'
+import { personalInfo } from '@/api/user'
+import store from '@/store/index'
 export default {
   name: 'Profile',
   components: { Account, Timeline },
   data() {
     return {
-      user: {},
-      activeTab: 'account'
+      basicInfo: {},
+      activeTab: 'account',
+      history: []
     }
   },
   computed: {
-    ...mapGetters([
-      'name',
-      'avatar',
-      'roles'
-    ])
+    ...mapGetters(['id'])
   },
   created() {
     console.log(this.roles)
@@ -52,12 +51,11 @@ export default {
   },
   methods: {
     getUser() {
-      this.user = {
-        name: this.name,
-        role: this.roles.map(p => p.name).join(' | ')
-        // email: 'admin@test.com',
-        // avatar: this.avatar
-      }
+      personalInfo({ userId: this.id }).then(res => {
+        this.basicInfo = res.data.basicInfo
+        this.history = res.data.history
+        store.dispatch('user/setRole', res.data.basicInfo.role)
+      })
     }
   }
 }

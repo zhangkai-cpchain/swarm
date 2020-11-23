@@ -23,14 +23,17 @@ class Pump {
    */
   contract_data = new ReplaySubject(showContractDataCount)
 
+   data = new ReplaySubject(showContractDataCount)
+
   /**
    * 概述
    */
-  summary_data = new BehaviorSubject({
-    dataCount: 0,
-    blockCount: 0,
-    txCount: 0
-  })
+  dataCount = new BehaviorSubject(0)
+  blockCount = new BehaviorSubject(0)
+  txCount = new BehaviorSubject(0)
+  deviceCount = new BehaviorSubject(0)
+  peerCount = new BehaviorSubject(0)
+  taskCount = new BehaviorSubject(0)
 
   bar_data = new ReplaySubject(showChartDataCount)
 
